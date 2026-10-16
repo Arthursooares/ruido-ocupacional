@@ -1,0 +1,14 @@
+**/.gradle/
+**/build/
+**/.kotlin/
+**/local.properties
+**/.idea/
+.env
+.env.*
+!.env.example
+*.log
+
+# Ferramentas locais; não publicar SDK nem downloads
+/.tools/
+
+**/bin/

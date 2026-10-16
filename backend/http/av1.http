@@ -1,0 +1,116 @@
+# Execute uma seção de cada vez, com backend em http://localhost:8080.
+# Valores abaixo são fixtures de demonstração, não credenciais reais.
+@base = http://localhost:8080
+@email = aluno@example.test
+@senha = senha-de-demonstracao
+@token = COLE_O_TOKEN_RETORNADO_PELO_SIGNIN
+@ambienteId = 1
+@sensorId = 1
+
+### Cadastro público — 201; repetição retorna 409
+POST {{base}}/signup
+Content-Type: application/json
+
+{"nome":"Aluno AV1","email":"{{email}}","senha":"{{senha}}"}
+
+### Login público — copie o token da resposta para @token
+POST {{base}}/signin
+Content-Type: application/json
+
+{"email":"{{email}}","senha":"{{senha}}"}
+
+### Senha incorreta — 401
+POST {{base}}/signin
+Content-Type: application/json
+
+{"email":"{{email}}","senha":"incorreta"}
+
+### Sem autenticação — 401
+GET {{base}}/ambientes
+
+### Token inválido — 401
+GET {{base}}/sensores
+Authorization: Bearer invalido
+
+### Criar ambiente — 201; consulte a lista e ajuste @ambienteId
+POST {{base}}/ambientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Sala de máquinas","setor":"Produção","descricao":"Área de compressores","ativo":true,"dataCadastro":"2025-01-01"}
+
+### Listar ambientes
+GET {{base}}/ambientes
+Authorization: Bearer {{token}}
+
+### Buscar por ID
+GET {{base}}/ambientes/{{ambienteId}}
+Authorization: Bearer {{token}}
+
+### Busca parcial JPQL LIKE
+GET {{base}}/ambientes/buscar?nome=máq
+Authorization: Bearer {{token}}
+
+### Editar ambiente
+PUT {{base}}/ambientes/{{ambienteId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Sala de máquinas atualizada","setor":"Produção","descricao":"Área de compressores e motores","ativo":true,"dataCadastro":"2025-01-01"}
+
+### Entrada inválida — 400
+POST {{base}}/ambientes
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"","setor":"","descricao":"","ativo":true,"dataCadastro":"2025-01-01"}
+
+### Criar sensor — 201; consulte a lista e ajuste @sensorId
+# Repetir com o mesmo código retorna 409.
+POST {{base}}/sensores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Sensor de ruído A","codigo":"S-01","modelo":"ESP32","ativo":true,"dataInstalacao":"2025-01-02","ambienteId":{{ambienteId}}}
+
+### Listar sensores
+GET {{base}}/sensores
+Authorization: Bearer {{token}}
+
+### Sensor por ID
+GET {{base}}/sensores/{{sensorId}}
+Authorization: Bearer {{token}}
+
+### Busca parcial JPQL LIKE
+GET {{base}}/sensores/buscar?nome=ruído
+Authorization: Bearer {{token}}
+
+### Editar sensor
+PUT {{base}}/sensores/{{sensorId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Sensor de ruído atualizado","codigo":"S-01","modelo":"ESP32","ativo":false,"dataInstalacao":"2025-01-02","ambienteId":{{ambienteId}}}
+
+### Ambiente inexistente — 404
+POST {{base}}/sensores
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{"nome":"Sensor B","codigo":"S-02","modelo":"ESP32","ativo":true,"dataInstalacao":"2025-01-02","ambienteId":9223372036854775807}
+
+### Exclusão bloqueada enquanto há sensor — 409
+DELETE {{base}}/ambientes/{{ambienteId}}
+Authorization: Bearer {{token}}
+
+### Remover sensor — 200
+DELETE {{base}}/sensores/{{sensorId}}
+Authorization: Bearer {{token}}
+
+### Remover ambiente — 200 após remover os sensores
+DELETE {{base}}/ambientes/{{ambienteId}}
+Authorization: Bearer {{token}}
+
+### Registro removido — 404
+GET {{base}}/ambientes/{{ambienteId}}
+Authorization: Bearer {{token}}

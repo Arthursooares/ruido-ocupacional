@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:mariadb://localhost:3306/ruido_ocupacional_test}
+    username: ${TEST_DB_USERNAME:ruido_test}
+    password: ${TEST_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+app:
+  jwt:
+    secret: chave-exclusiva-do-ambiente-de-testes-com-mais-de-32-bytes
